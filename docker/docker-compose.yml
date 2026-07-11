@@ -1,0 +1,141 @@
+# ============================================
+# 单机全量部署文件（开发/测试/小规模生产）
+# 全部服务跑在一台机器上
+# ============================================
+
+version: '3.8'
+
+services:
+  # ======== MySQL ========
+  mysql:
+    image: mysql:8.0
+    container_name: nursery-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nursery}
+      MYSQL_USER: ${MYSQL_USER:-nursery}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nursery123}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/backup:/backup
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    networks:
+      - nursery-net
+
+  # ======== Redis ========
+  redis:
+    image: redis:7-alpine
+    container_name: nursery-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - nursery-net
+
+  # ======== RabbitMQ ========
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: nursery-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - nursery-net
+
+  # ======== MinIO ========
+  minio:
+    image: minio/minio:latest
+    container_name: nursery-minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - nursery-net
+
+  # ======== Backend ========
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: nursery-backend:latest
+    container_name: nursery-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILE: prod
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nursery}
+      MYSQL_USER: ${MYSQL_USER:-nursery}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nursery123}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_VHOST: /
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-nursery}
+    volumes:
+      - backend-logs:/app/logs
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - minio
+    networks:
+      - nursery-net
+
+  # ======== Nginx ========
+  nginx:
+    image: nginx:alpine
+    container_name: nursery-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ../frontend-web/dist:/usr/share/nginx/html/web
+    depends_on:
+      - backend
+    networks:
+      - nursery-net
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  minio-data:
+  backend-logs:
+
+networks:
+  nursery-net:
+    driver: bridge

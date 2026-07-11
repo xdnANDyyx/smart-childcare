@@ -1,0 +1,61 @@
+# ============================================
+# 数据服务器部署文件
+# 部署在: 数据一体机（Xeon 4309Y / 16GB / 2×480GB SSD）
+# 运行: MySQL + RabbitMQ
+# ============================================
+
+version: '3.8'
+
+services:
+  # ======== MySQL 数据库 ========
+  mysql:
+    image: mysql:8.0
+    container_name: nursery-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Root@Nursery2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nursery}
+      MYSQL_USER: ${MYSQL_USER:-nursery}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Nursery@Prod2026}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/backup:/backup
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max-connections=300
+      --innodb-buffer-pool-size=4G
+      --slow-query-log=ON
+      --long-query-time=2
+    networks:
+      - nursery-net
+
+  # ======== RabbitMQ 消息队列 ========
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: nursery-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nursery}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-Rabbitmq@Nursery2026}
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - nursery-net
+
+volumes:
+  mysql-data:
+  rabbitmq-data:
+
+networks:
+  nursery-net:
+    driver: bridge

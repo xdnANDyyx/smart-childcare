@@ -1,0 +1,78 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": { "navigationBarTitleText": "登录" }
+    },
+    {
+      "path": "pages/teacher/index",
+      "style": { "navigationBarTitleText": "老师工作台" }
+    },
+    {
+      "path": "pages/teacher/student-list",
+      "style": { "navigationBarTitleText": "儿童花名册" }
+    },
+    {
+      "path": "pages/teacher/nursery-log",
+      "style": { "navigationBarTitleText": "保育日志" }
+    },
+    {
+      "path": "pages/teacher/notification",
+      "style": { "navigationBarTitleText": "通知公告" }
+    },
+    {
+      "path": "pages/parent/index",
+      "style": { "navigationBarTitleText": "家长首页" }
+    },
+    {
+      "path": "pages/parent/daily-report",
+      "style": { "navigationBarTitleText": "每日报告" }
+    },
+    {
+      "path": "pages/parent/attendance",
+      "style": { "navigationBarTitleText": "考勤记录" }
+    },
+    {
+      "path": "pages/parent/bill",
+      "style": { "navigationBarTitleText": "账单缴费" }
+    },
+    {
+      "path": "pages/parent/album",
+      "style": { "navigationBarTitleText": "成长相册" }
+    },
+    {
+      "path": "pages/admin/index",
+      "style": { "navigationBarTitleText": "管理看板" }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "智慧托育",
+    "navigationBarBackgroundColor": "#409eff",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#409eff",
+    "list": [
+      {
+        "pagePath": "pages/teacher/index",
+        "text": "首页",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/teacher/notification",
+        "text": "通知",
+        "iconPath": "static/tab/notice.png",
+        "selectedIconPath": "static/tab/notice-active.png"
+      },
+      {
+        "pagePath": "pages/teacher/student-list",
+        "text": "儿童",
+        "iconPath": "static/tab/user.png",
+        "selectedIconPath": "static/tab/user-active.png"
+      }
+    ]
+  }
+}

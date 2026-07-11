@@ -1,0 +1,86 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  profiles:
+    active: dev
+
+  # Jackson
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+  # Servlet
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+# MyBatis-Plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.zhyyt.nursery.module.**.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: delFlag
+      logic-delete-value: '2'
+      logic-not-delete-value: '0'
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+# Sa-Token
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: false
+
+# Knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.zhyyt.nursery
+
+# MinIO
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: nursery
+
+# XXL-JOB
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:9090/xxl-job-admin
+    accessToken:
+    executor:
+      appname: nursery-executor
+      port: 9999
+      logpath: ./xxl-job-log
+      logretentiondays: 30
+
+logging:
+  level:
+    com.zhyyt.nursery: debug
+    org.springframework: warn
