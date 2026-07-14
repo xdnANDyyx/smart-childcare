@@ -1,8 +1,12 @@
 -- ============================================
 -- 智慧托育综合应用平台 - 数据库初始化脚本
+-- 修复：添加 SET NAMES 解决中文乱码问题
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS nursery DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- 关键修复：强制客户端使用 UTF8MB4 编码读取本文件
+SET NAMES utf8mb4;
+
+CREATE DATABASE IF NOT EXISTS nursery DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE nursery;
 
 -- ======== 系统管理表 ========
@@ -20,7 +24,7 @@ CREATE TABLE IF NOT EXISTS sys_dept (
     del_flag     CHAR(1)      DEFAULT '0',
     create_time  DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='部门表';
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS sys_user (
@@ -42,7 +46,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
     create_by    VARCHAR(50),
     update_by    VARCHAR(50),
     UNIQUE KEY uk_username (username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 角色表
 CREATE TABLE IF NOT EXISTS sys_role (
@@ -56,7 +60,7 @@ CREATE TABLE IF NOT EXISTS sys_role (
     update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     create_by    VARCHAR(50),
     update_by    VARCHAR(50)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='角色表';
 
 -- 菜单表
 CREATE TABLE IF NOT EXISTS sys_menu (
@@ -75,21 +79,21 @@ CREATE TABLE IF NOT EXISTS sys_menu (
     update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     create_by    VARCHAR(50),
     update_by    VARCHAR(50)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='菜单表';
 
 -- 用户角色关联表
 CREATE TABLE IF NOT EXISTS sys_user_role (
     user_id  BIGINT NOT NULL,
     role_id  BIGINT NOT NULL,
     PRIMARY KEY (user_id, role_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='用户角色关联表';
 
 -- 角色菜单关联表
 CREATE TABLE IF NOT EXISTS sys_role_menu (
     role_id  BIGINT NOT NULL,
     menu_id  BIGINT NOT NULL,
     PRIMARY KEY (role_id, menu_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色菜单关联表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='角色菜单关联表';
 
 -- 字典类型表
 CREATE TABLE IF NOT EXISTS sys_dict_type (
@@ -102,7 +106,7 @@ CREATE TABLE IF NOT EXISTS sys_dict_type (
     create_by    VARCHAR(50),
     update_by    VARCHAR(50),
     UNIQUE KEY uk_dict_type (dict_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字典类型表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='字典类型表';
 
 -- 字典数据表
 CREATE TABLE IF NOT EXISTS sys_dict_data (
@@ -117,7 +121,7 @@ CREATE TABLE IF NOT EXISTS sys_dict_data (
     status       CHAR(1)      DEFAULT '0',
     create_time  DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字典数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='字典数据表';
 
 -- ======== 托育业务表 ========
 
@@ -136,7 +140,7 @@ CREATE TABLE IF NOT EXISTS nur_organization (
     status       CHAR(1)      DEFAULT '0',
     create_time  DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='托育机构表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='托育机构表';
 
 -- 班级表
 CREATE TABLE IF NOT EXISTS nur_class (
@@ -154,7 +158,7 @@ CREATE TABLE IF NOT EXISTS nur_class (
     del_flag          CHAR(1)      DEFAULT '0',
     create_time       DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time       DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='班级表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='班级表';
 
 -- 儿童表
 CREATE TABLE IF NOT EXISTS nur_student (
@@ -178,7 +182,7 @@ CREATE TABLE IF NOT EXISTS nur_student (
     create_time   DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time   DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     create_by     VARCHAR(50)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='儿童表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='儿童表';
 
 -- 出勤记录表
 CREATE TABLE IF NOT EXISTS nur_attendance (
@@ -194,7 +198,7 @@ CREATE TABLE IF NOT EXISTS nur_attendance (
     remark           VARCHAR(200),
     create_time      DATETIME  DEFAULT CURRENT_TIMESTAMP,
     update_time      DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='出勤记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='出勤记录表';
 
 -- 保育日志表
 CREATE TABLE IF NOT EXISTS nur_nursery_log (
@@ -211,7 +215,7 @@ CREATE TABLE IF NOT EXISTS nur_nursery_log (
     images        TEXT,
     create_time   DATETIME  DEFAULT CURRENT_TIMESTAMP,
     update_time   DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='保育日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='保育日志表';
 
 -- 招生线索表
 CREATE TABLE IF NOT EXISTS nur_recruitment (
@@ -234,7 +238,7 @@ CREATE TABLE IF NOT EXISTS nur_recruitment (
     remark              VARCHAR(500),
     create_time         DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time         DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招生线索表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='招生线索表';
 
 -- 收费项目表
 CREATE TABLE IF NOT EXISTS nur_fee_item (
@@ -249,7 +253,7 @@ CREATE TABLE IF NOT EXISTS nur_fee_item (
     remark        VARCHAR(200),
     create_time   DATETIME     DEFAULT CURRENT_TIMESTAMP,
     update_time   DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费项目表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='收费项目表';
 
 -- 健康档案表
 CREATE TABLE IF NOT EXISTS nur_health_record (
@@ -276,7 +280,7 @@ CREATE TABLE IF NOT EXISTS nur_health_record (
     remark            VARCHAR(500),
     create_time       DATETIME  DEFAULT CURRENT_TIMESTAMP,
     update_time       DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='健康档案表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT='健康档案表';
 
 -- ======== 初始化数据 ========
 

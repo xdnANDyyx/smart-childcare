@@ -38,7 +38,9 @@ public class AuthServiceImpl implements AuthService {
     public Map<String, Object> login(String username, String password, String captcha, String captchaKey) {
         // 验证码校验
         if (captchaKey != null && !captchaKey.isEmpty()) {
-            Object cached = redisTemplate.opsForValue().delete(Constants.CAPTCHA_KEY + captchaKey);
+            String captchaCacheKey = Constants.CAPTCHA_KEY + captchaKey;
+            Object cached = redisTemplate.opsForValue().get(captchaCacheKey);
+            redisTemplate.delete(captchaCacheKey);
             if (cached == null || !cached.toString().equalsIgnoreCase(captcha)) {
                 throw new BusinessException("验证码错误或已过期");
             }

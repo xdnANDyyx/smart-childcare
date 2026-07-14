@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhyyt.nursery.module.system.entity.SysDict;
 import com.zhyyt.nursery.module.system.entity.SysDictData;
 import com.zhyyt.nursery.module.system.mapper.SysDictMapper;
+import com.zhyyt.nursery.module.system.mapper.SysDictDataMapper;
 import com.zhyyt.nursery.module.system.service.SysDictService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +22,7 @@ import com.zhyyt.nursery.common.constant.Constants;
 public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> implements SysDictService {
 
     private final SysDictMapper dictMapper;
+    private final SysDictDataMapper dictDataMapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -78,23 +80,23 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
             wrapper.eq(SysDictData::getDictType, dictType);
         }
         wrapper.orderByAsc(SysDictData::getDictSort);
-        return dictMapper.selectDictDataByType(dictType);
+        return dictDataMapper.selectList(wrapper);
     }
 
     @Override
     public void createDictData(SysDictData dictData) {
-        dictMapper.insert(dictData);
+        dictDataMapper.insert(dictData);
         redisTemplate.delete(Constants.CACHE_PREFIX + "dict:" + dictData.getDictType());
     }
 
     @Override
     public void updateDictData(SysDictData dictData) {
-        dictMapper.updateById(dictData);
+        dictDataMapper.updateById(dictData);
         redisTemplate.delete(Constants.CACHE_PREFIX + "dict:" + dictData.getDictType());
     }
 
     @Override
     public void deleteDictData(Long dictCode) {
-        dictMapper.deleteById(dictCode);
+        dictDataMapper.deleteById(dictCode);
     }
 }
