@@ -15,6 +15,7 @@ export const userApi = {
   edit: (data: any) => request.put('/system/user', data),
   remove: (userId: number) => request.delete(`/system/user/${userId}`),
   resetPwd: (userId: number, newPassword: string) => request.put('/system/user/resetPwd', null, { params: { userId, newPassword } }),
+  getRoleIds: (userId: number) => request.get(`/system/user/roleIds/${userId}`),
 }
 
 export const roleApi = {
@@ -22,6 +23,7 @@ export const roleApi = {
   add: (data: any) => request.post('/system/role', data),
   edit: (data: any) => request.put('/system/role', data),
   remove: (roleId: number) => request.delete(`/system/role/${roleId}`),
+  getMenuIds: (roleId: number) => request.get(`/system/role/menuIds/${roleId}`),
 }
 
 export const menuApi = {

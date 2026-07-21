@@ -115,4 +115,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         user.setStatus(status);
         userMapper.updateById(user);
     }
+
+    @Override
+    public List<Long> getUserRoleIds(Long userId) {
+        return userMapper.selectRoleIdsByUserId(userId);
+    }
 }

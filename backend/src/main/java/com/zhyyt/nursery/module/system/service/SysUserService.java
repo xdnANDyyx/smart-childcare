@@ -27,4 +27,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /** 修改状态 */
     void changeStatus(Long userId, String status);
+
+    /** 查询用户的角色ID列表 */
+    List<Long> getUserRoleIds(Long userId);
 }

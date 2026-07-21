@@ -16,4 +16,7 @@ public interface SysRoleService extends IService<SysRole> {
     void deleteRole(Long roleId);
 
     void changeStatus(Long roleId, String status);
+
+    /** 查询角色的菜单ID列表 */
+    List<Long> getRoleMenuIds(Long roleId);
 }

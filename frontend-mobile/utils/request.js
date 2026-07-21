@@ -1,4 +1,4 @@
-const BASE_URL = '/api'
+import BASE_URL from '../config/index.js'
 
 export function request(options) {
   return new Promise((resolve, reject) => {
@@ -24,6 +24,7 @@ export function request(options) {
         }
       },
       fail(err) {
+		console.log("打印报错：",err)
         uni.showToast({ title: '网络异常', icon: 'none' })
         reject(err)
       }

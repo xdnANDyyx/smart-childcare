@@ -74,4 +74,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         role.setStatus(status);
         roleMapper.updateById(role);
     }
+
+    @Override
+    public List<Long> getRoleMenuIds(Long roleId) {
+        return menuMapper.selectMenuIdsByRoleId(roleId);
+    }
 }

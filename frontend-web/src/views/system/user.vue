@@ -66,6 +66,16 @@
         <el-form-item label="邮箱">
           <el-input v-model="form.email" />
         </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="selectedRoleIds" multiple placeholder="请选择角色" style="width: 100%">
+            <el-option
+              v-for="role in roleList"
+              :key="role.roleId"
+              :label="role.roleName"
+              :value="role.roleId"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="性别">
           <el-radio-group v-model="form.sex">
             <el-radio value="0">男</el-radio>
@@ -91,7 +101,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { userApi } from '@/api'
+import { userApi, roleApi } from '@/api'
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -101,6 +111,10 @@ const formRef = ref<FormInstance>()
 
 const query = reactive({ keyword: '', status: '' })
 const form = reactive<any>({ username: '', nickname: '', password: '', phone: '', email: '', sex: '2', status: '0' })
+
+// 角色列表和选中项
+const roleList = ref<any[]>([])
+const selectedRoleIds = ref<number[]>([])
 
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -117,6 +131,11 @@ async function loadData() {
   }
 }
 
+async function loadRoles() {
+  const res: any = await roleApi.list()
+  roleList.value = res.data || []
+}
+
 function resetQuery() {
   query.keyword = ''
   query.status = ''
@@ -126,13 +145,21 @@ function resetQuery() {
 function handleAdd() {
   isEdit.value = false
   Object.assign(form, { userId: null, username: '', nickname: '', password: '', phone: '', email: '', sex: '2', status: '0' })
+  selectedRoleIds.value = []
   dialogVisible.value = true
 }
 
-function handleEdit(row: any) {
+async function handleEdit(row: any) {
   isEdit.value = true
   Object.assign(form, row)
+  selectedRoleIds.value = []
   dialogVisible.value = true
+  try {
+    const res: any = await userApi.getRoleIds(row.userId)
+    selectedRoleIds.value = res.data || []
+  } catch (e) {
+    selectedRoleIds.value = []
+  }
 }
 
 async function handleSave() {
@@ -140,9 +167,9 @@ async function handleSave() {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     if (isEdit.value) {
-      await userApi.edit({ user: form, roleIds: [] })
+      await userApi.edit({ user: form, roleIds: selectedRoleIds.value })
     } else {
-      await userApi.add({ user: form, roleIds: [] })
+      await userApi.add({ user: form, roleIds: selectedRoleIds.value })
     }
     ElMessage.success('操作成功')
     dialogVisible.value = false
@@ -163,5 +190,8 @@ async function handleResetPwd(row: any) {
   ElMessage.success('密码已重置')
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  loadData()
+  loadRoles()
+})
 </script>

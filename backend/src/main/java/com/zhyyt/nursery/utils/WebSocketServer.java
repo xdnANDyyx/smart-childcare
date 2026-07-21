@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cn.dev33.satoken.SaManager.log;
+
 /**
  * WebSocket 服务端 (用于实时消息推送)
  */

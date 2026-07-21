@@ -58,4 +58,10 @@ public class SysRoleController {
         roleService.changeStatus(roleId, status);
         return Result.ok();
     }
+
+    @Operation(summary = "查询角色的菜单ID列表")
+    @GetMapping("/menuIds/{roleId}")
+    public Result<List<Long>> getMenuIds(@PathVariable Long roleId) {
+        return Result.ok(roleService.getRoleMenuIds(roleId));
+    }
 }

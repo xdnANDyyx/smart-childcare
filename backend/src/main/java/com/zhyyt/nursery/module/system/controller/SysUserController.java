@@ -79,4 +79,10 @@ public class SysUserController {
         userService.changeStatus(userId, status);
         return Result.ok();
     }
+
+    @Operation(summary = "查询用户的角色ID列表")
+    @GetMapping("/roleIds/{userId}")
+    public Result<List<Long>> getRoleIds(@PathVariable Long userId) {
+        return Result.ok(userService.getUserRoleIds(userId));
+    }
 }

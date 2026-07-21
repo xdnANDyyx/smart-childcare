@@ -29,7 +29,7 @@
       </el-table>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="500px">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="600px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="角色名称" prop="roleName"><el-input v-model="form.roleName" /></el-form-item>
         <el-form-item label="角色编码" prop="roleKey"><el-input v-model="form.roleKey" /></el-form-item>
@@ -39,6 +39,18 @@
             <el-radio value="0">正常</el-radio>
             <el-radio value="1">停用</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="菜单权限">
+          <div style="border: 1px solid #dcdfe6; border-radius: 4px; padding: 8px; max-height: 300px; overflow-y: auto; width: 100%">
+            <el-tree
+              ref="menuTreeRef"
+              :data="menuTree"
+              show-checkbox
+              node-key="menuId"
+              :props="{ label: 'menuName', children: 'children' }"
+              default-expand-all
+            />
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -50,9 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { roleApi } from '@/api'
+import type { ElTree } from 'element-plus'
+import { roleApi, menuApi } from '@/api'
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -60,6 +73,8 @@ const keyword = ref('')
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
+const menuTreeRef = ref<InstanceType<typeof ElTree>>()
+const menuTree = ref<any[]>([])
 const form = reactive<any>({ roleName: '', roleKey: '', roleSort: 0, status: '0' })
 const rules = {
   roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
@@ -76,24 +91,70 @@ async function loadData() {
   }
 }
 
+async function loadMenus() {
+  try {
+    const res: any = await menuApi.list()
+    menuTree.value = res.data || []
+  } catch (e) {
+    menuTree.value = []
+  }
+}
+
 function handleAdd() {
   isEdit.value = false
   Object.assign(form, { roleId: null, roleName: '', roleKey: '', roleSort: 0, status: '0' })
   dialogVisible.value = true
+  nextTick(() => {
+    menuTreeRef.value?.setCheckedKeys([])
+  })
 }
 
-function handleEdit(row: any) {
+async function handleEdit(row: any) {
   isEdit.value = true
   Object.assign(form, row)
   dialogVisible.value = true
+  try {
+    const res: any = await roleApi.getMenuIds(row.roleId)
+    const allKeys: number[] = res.data || []
+    // 只勾选叶子节点，避免父节点被 setCheckedKeys 后级联勾选所有子节点
+    const leafIds = getLeafMenuIds(menuTree.value, allKeys)
+    nextTick(() => {
+      menuTreeRef.value?.setCheckedKeys(leafIds)
+    })
+  } catch (e) {
+    nextTick(() => {
+      menuTreeRef.value?.setCheckedKeys([])
+    })
+  }
+}
+
+/** 从菜单树中提取叶子节点ID（在 allKeys 范围内的） */
+function getLeafMenuIds(tree: any[], allKeys: number[]): number[] {
+  const keySet = new Set(allKeys)
+  const leaves: number[] = []
+  function walk(nodes: any[]) {
+    for (const node of nodes) {
+      if (!node.children || node.children.length === 0) {
+        if (keySet.has(node.menuId)) leaves.push(node.menuId)
+      } else {
+        walk(node.children)
+      }
+    }
+  }
+  walk(tree)
+  return leaves
 }
 
 async function handleSave() {
   if (!formRef.value) return
   await formRef.value.validate(async (valid) => {
     if (!valid) return
-    if (isEdit.value) await roleApi.edit({ role: form, menuIds: [] })
-    else await roleApi.add({ role: form, menuIds: [] })
+    // 获取选中的叶子节点 + 半选状态的父节点
+    const checkedKeys = menuTreeRef.value?.getCheckedKeys() as number[] || []
+    const halfCheckedKeys = menuTreeRef.value?.getHalfCheckedKeys() as number[] || []
+    const menuIds = [...checkedKeys, ...halfCheckedKeys]
+    if (isEdit.value) await roleApi.edit({ role: form, menuIds })
+    else await roleApi.add({ role: form, menuIds })
     ElMessage.success('操作成功')
     dialogVisible.value = false
     loadData()
@@ -107,5 +168,8 @@ async function handleDelete(row: any) {
   loadData()
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  loadData()
+  loadMenus()
+})
 </script>
